@@ -1,47 +1,91 @@
-/**
- * Contratos de domínio compartilhados do Weather App.
- *
- * Decisão de arquitetura: as temperaturas são sempre armazenadas em Celsius
- * internamente e convertidas apenas na camada de apresentação. Assim, a troca
- * de unidade (C/F) nunca dispara um novo request.
- */
-
 export type Unit = 'celsius' | 'fahrenheit';
 
-/** Resultado da API de geocoding (uma cidade). */
 export interface City {
   id: number;
   name: string;
-  country: string;
-  /** Estado/região, quando disponível (ajuda a desambiguar homônimos). */
-  admin1?: string;
   latitude: number;
   longitude: number;
+  country: string;
+  countryCode: string;
+  admin1: string | null;
 }
 
-/** Condições atuais. Temperatura sempre em °C. */
 export interface CurrentWeather {
-  temperature: number;
-  weatherCode: number;
-  humidity: number;
-  windSpeed: number;
-  pressure: number;
-  precipitation: number;
+  // Hora local da cidade, sem offset (ex.: "2026-11-11T15:00")
   time: string;
+  // Temperaturas em °C; null quando ausente ou inválido no payload
+  temperature: number | null;
+  apparentTemperature: number | null;
+  // Código WMO bruto; texto e ícone são derivados na UI
+  weatherCode: number | null;
+  isDay: boolean;
+  // Umidade relativa em %
+  humidity: number | null;
+  // Vento a 10 m em km/h
+  windSpeed: number | null;
+  // Precipitação em mm
+  precipitation: number | null;
+  // Pressão ao nível do mar em hPa
+  pressure: number | null;
 }
 
-/** Um dia da previsão. Temperaturas sempre em °C. */
+// Grupo de ícone derivado do código WMO (plano 4.2)
+export type ConditionGroup =
+  | 'sun'
+  | 'partly-cloudy'
+  | 'cloud'
+  | 'fog'
+  | 'rain'
+  | 'snow'
+  | 'thunderstorm'
+  | 'unknown';
+
+// Chave do rótulo pt-BR em text/pt-BR.ts (D-01)
+export type WeatherLabelKey =
+  | 'clearSky'
+  | 'mainlyClear'
+  | 'partlyCloudy'
+  | 'overcast'
+  | 'fog'
+  | 'drizzle'
+  | 'freezingDrizzle'
+  | 'rain'
+  | 'freezingRain'
+  | 'snow'
+  | 'snowGrains'
+  | 'rainShowers'
+  | 'snowShowers'
+  | 'thunderstorm'
+  | 'thunderstormHail'
+  | 'unknown';
+
+export interface WeatherCondition {
+  labelKey: WeatherLabelKey;
+  group: ConditionGroup;
+}
+
+// Tipos de falha da camada de serviço; a UI escolhe mensagem e botão por tipo (plano 4.5)
+export type WeatherErrorKind =
+  | 'network'
+  | 'timeout'
+  | 'server'
+  | 'rate_limit'
+  | 'invalid_response'
+  | 'no_data';
+
 export interface ForecastDay {
+  // Dia local da cidade (ex.: "2026-11-11")
   date: string;
-  min: number;
-  max: number;
-  weatherCode: number;
-  precipitationProbability: number;
+  temperatureMax: number | null;
+  temperatureMin: number | null;
+  weatherCode: number | null;
 }
 
-/** Agregado entregue à UI: cidade + clima atual + 5 dias de previsão. */
 export interface WeatherData {
   city: City;
+  // Fuso IANA informado pela API (ex.: "America/Sao_Paulo")
+  timezone: string;
   current: CurrentWeather;
-  forecast: ForecastDay[];
+  // Até 5 dias, em ordem crescente de date
+  daily: ForecastDay[];
 }
