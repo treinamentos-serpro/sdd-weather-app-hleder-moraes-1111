@@ -1,5 +1,5 @@
 ---
-mode: agent
+agent: agent
 description: 'Implementa uma tarefa específica do backlog seguindo spec, plano e convenções.'
 ---
 
