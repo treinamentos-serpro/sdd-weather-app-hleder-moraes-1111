@@ -10,7 +10,7 @@ export default function SearchBar({ onSearch, disabled = false }: SearchBarProps
   const [value, setValue] = useState('');
   const inputId = useId();
   const term = value.trim();
-  const canSubmit = !disabled && term.length > 0;
+  const canSubmit = !disabled && term.length >= 2;
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -31,6 +31,7 @@ export default function SearchBar({ onSearch, disabled = false }: SearchBarProps
         id={inputId}
         type="search"
         name="city"
+        maxLength={100}
         value={value}
         onChange={(event) => setValue(event.target.value)}
         placeholder={ptBR.search.placeholder}
