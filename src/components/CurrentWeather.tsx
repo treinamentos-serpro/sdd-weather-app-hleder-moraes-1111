@@ -32,7 +32,7 @@ function Metric({ label, value }: MetricProps) {
 export default function CurrentWeather({ city, current, unit }: CurrentWeatherProps) {
   const condition = describeWeatherCode(current.weatherCode);
   const label = ptBR.weather[condition.labelKey];
-  const place = city.admin1 ? `${city.name}, ${city.admin1}` : city.name;
+  const place = [city.name, city.admin1, city.country].filter(Boolean).join(', ');
 
   return (
     <section
